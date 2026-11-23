@@ -1,8 +1,6 @@
 # push_swap benchmark
 
-Python port of a 42 `push_swap` project, with a PyQt6 GUI to benchmark the
-sorting methods. It measures the number of operations ("turns") each method
-needs as a function of the stack size N.
+Python port of a 42 `push_swap` project, with a PyQt6 GUI to benchmark the sorting methods. It measures the number of operations ("turns") each method needs as a function of the stack size N.
 
 ![push_swap vizualisator](Screenshot.png)
 
@@ -57,21 +55,17 @@ src/
 | `turk`   | Always push the element with the cheapest combined rotation cost     | about 700 turns for N=100, 5500 for N=500 |
 | `direct` | Push the minimum to `b` each time, then pull everything back         | O(n^2) turns     |
 
-Radix always performs the same number of turns for a given N, so its standard
-deviation is exactly 0. The other methods depend on element positions, so their
-deviation is non-zero.
+Radix always performs the same number of turns for a given N, so its standard deviation is exactly 0. The other methods depend on element positions, so their deviation is non-zero.
 
 `direct` and `turk` get slow for large N (see Performance).
 
 ## How it works
 
 Every operation (`push`, `swap`, `rotate`, ...) returns its name as a string
-(`"pa"`, `"rrb"`, ...), and every sort function returns the list of operations
-it performed. The number of turns is `len(ops)`.
+(`"pa"`, `"rrb"`, ...), and every sort function returns the list of operations it performed. The number of turns is `len(ops)`.
 
 For each N, the benchmark builds `Runs per N` random permutations of `0..N-1`,
-runs the selected method on each, checks that the result is sorted, and
-records the mean and standard deviation of the operation count.
+runs the selected method on each, checks that the result is sorted, and records the mean and standard deviation of the operation count.
 
 ## GUI
 
@@ -83,7 +77,7 @@ records the mean and standard deviation of the operation count.
 | Runs per N    | Number of random inputs per N                                  |
 | X / Y scale   | `linear` or `log` axes of the plots (can be changed any time)  |
 | Methods       | Tick one or several methods, one curve each                    |
-| Benchmark     | Run the benchmark                                              |
+| Benchmark     | Run the benchmark (the plots update live, point by point)      |
 | Stop          | Stop the run and keep the partial results                      |
 
 Hover over any control to see a tooltip describing it.
@@ -91,15 +85,15 @@ Hover over any control to see a tooltip describing it.
 Two plots are shown, both as a function of N:
 
 - the mean number of turns (X and Y scales selectable),
-- the standard deviation as a percentage of the mean (the Y axis is always
-  linear, because the value can be exactly 0).
+- the standard deviation as a percentage of the mean (the Y axis is always   linear, because the value can be exactly 0).
 
 Example: N spacing `log`, 4 points, 10 to 10000 tests N = 10, 100, 1000, 10000.
 Rounding to integers can merge neighbouring values, so the final number of
 points may be lower than requested (shown in the status line).
 
-All settings (values, scales, ticked methods, window size and position) are
-saved when the window closes and restored at the next start.
+The plots are updated live while the benchmark runs, so you can see the curves grow and stop early once you have seen enough.
+
+All settings (values, scales, ticked methods, window size and position) are saved when the window closes and restored at the next start.
 
 ## Performance
 
@@ -130,14 +124,10 @@ It then appears in the GUI automatically.
 
 ## Troubleshooting
 
-**Wayland warnings.** Qt on Wayland may print
-`qt.qpa.wayland.textinput ... is focused` warnings. They are harmless and are
+**Wayland warnings.** Qt on Wayland may print `qt.qpa.wayland.textinput ... is focused` warnings. They are harmless and are
 silenced in `bench.py`.
 
-**Window position not restored.** Native Wayland does not let applications
-position their own windows, so only the size is restored. `bench.py` switches
-to XWayland (`QT_QPA_PLATFORM=xcb`) when both Wayland and X11 are available,
-which makes the position work. This needs `libxcb-cursor0` on Debian/Ubuntu.
+**Window position not restored.** Native Wayland does not let applications position their own windows, so only the size is restored. `bench.py` switches to XWayland (`QT_QPA_PLATFORM=xcb`) when both Wayland and X11 are available, which makes the position work. This needs `libxcb-cursor0` on Debian/Ubuntu.
 To force it manually: `QT_QPA_PLATFORM=xcb python bench.py`.
 
 **Reset the settings.** Settings are stored via `QSettings`. Delete

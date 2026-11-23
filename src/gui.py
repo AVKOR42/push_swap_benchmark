@@ -7,11 +7,10 @@ from PyQt6.QtWidgets import (
 	QListWidgetItem, QMainWindow, QMessageBox, QProgressBar, QPushButton,
 	QSpinBox, QVBoxLayout, QWidget,
 )
-
+import numpy as np
 from src.worker import BenchmarkWorker
-
 from .algorithms import ALGORITHMS
-from .benchmark import benchmark_point, make_sizes
+from .benchmark import make_sizes
 
 
 class MainWindow(QMainWindow):
@@ -117,12 +116,19 @@ class MainWindow(QMainWindow):
 							log=self.n_spacing.currentText() == "log")
 
 		self.save_settings()
+		self.index = {n: i for i, n in enumerate(sizes)}   # N -> position
+		self.results = {
+			m: (sizes, np.full(len(sizes), np.nan), np.full(len(sizes), np.nan))
+			for m in methods
+		}
+		self.plot()     # creates all curves and the legend, still empty
 		self.progress.setValue(0)
 		self.run_btn.setEnabled(False)
 		self.stop_btn.setEnabled(True)
 		self.status.setText(f"Running ({len(sizes)} points)...")
 		self.worker = BenchmarkWorker(methods, sizes, self.runs.value())
 		self.worker.progress.connect(self.on_progress)
+		self.worker.point.connect(self.on_point)
 		self.worker.completed.connect(self.on_completed)
 		self.worker.failed.connect(self.on_failed)
 		self.worker.start()
@@ -135,11 +141,10 @@ class MainWindow(QMainWindow):
 		self.progress.setMaximum(total)
 		self.progress.setValue(done)
 
-	def on_completed(self, results):
-		self.results = results
-		self._finish("Done.")
+	def on_completed(self):
+		self._finish("Stopped." if self.worker.stopped else "Done.")
 		self.plot()
-
+		
 	def on_failed(self, msg):
 		self._finish("Error.")
 		QMessageBox.critical(self, "Benchmark failed", msg)
@@ -150,13 +155,20 @@ class MainWindow(QMainWindow):
 		self.status.setText(text)
 
 	# --- plotting ---
+	@staticmethod
+	def _rel(means, stds):
+		with np.errstate(divide="ignore", invalid="ignore"):
+			return np.where(means > 0, 100 * stds / means, np.nan)
+
 	def plot(self):
+		"""Full redraw (scale change, start of run, final redraw)."""
 		self.ax_mean.cla()
 		self.ax_std.cla()
+		self.lines = {}
 		for name, (ns, means, stds) in self.results.items():
-			rel = [100 * s / m if m else 0.0 for s, m in zip(stds, means)]
-			self.ax_mean.plot(ns, means, marker="o", ms=3, label=name)
-			self.ax_std.plot(ns, rel, marker="o", ms=3, label=name)
+			l_mean, = self.ax_mean.plot(ns, means, marker="o", ms=3, label=name)
+			l_std, = self.ax_std.plot(ns, self._rel(means, stds), marker="o", ms=3, label=name)
+			self.lines[name] = (l_mean, l_std)
 
 		self.ax_mean.set_ylabel("mean number of turns")
 		self.ax_std.set_ylabel("std deviation (% of mean)")
@@ -166,8 +178,26 @@ class MainWindow(QMainWindow):
 			ax.grid(True, alpha=0.3)
 		self.ax_mean.set_yscale(self.y_scale.currentText())
 		self.ax_std.set_yscale("linear")
+
 		if self.results:
+			ns = next(iter(self.results.values()))[0]
+			lo, hi = ns[0], ns[-1]
+			self.ax_mean.set_xlim(lo * 0.95, hi * 1.05)   # full range from the start
 			self.ax_mean.legend()
+		self.canvas.draw_idle()
+
+	def on_point(self, method, n, mean, std):
+		ns, means, stds = self.results[method]
+		i = self.index[n]
+		means[i] = mean
+		stds[i] = std
+
+		l_mean, l_std = self.lines[method]
+		l_mean.set_ydata(means)
+		l_std.set_ydata(self._rel(means, stds))
+		for ax in (self.ax_mean, self.ax_std):
+			ax.relim()
+			ax.autoscale_view(scalex=False)     # x is fixed, only rescale y
 		self.canvas.draw_idle()
 
 	# --- tooltips ---

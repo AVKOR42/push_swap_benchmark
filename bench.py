@@ -16,8 +16,8 @@ os.environ.setdefault("QT_LOGGING_RULES", "qt.qpa.wayland.textinput=false")
 if os.environ.get("WAYLAND_DISPLAY") and os.environ.get("DISPLAY"):
     os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
-from PyQt6.QtWidgets import QApplication
-from src.gui import MainWindow
+from PyQt6.QtWidgets import QApplication  # noqa: E402
+from src.gui import MainWindow  # noqa: E402
 
 
 if __name__ == "__main__":
