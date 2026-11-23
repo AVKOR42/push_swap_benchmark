@@ -7,7 +7,9 @@ from src.stack import Stack
 
 
 def make_sizes(n_start: int, n_end: int, points: int, log: bool = False) -> list[int]:
-	"""N values from n_start to n_end (both included), linear or geometric spacing."""
+	"""
+	N values from n_start to n_end (both included), linear or geometric spacing.
+	"""
 	if points <= 1 or n_start == n_end:
 		return [n_start]
 	last = points - 1
@@ -21,7 +23,8 @@ def make_sizes(n_start: int, n_end: int, points: int, log: bool = False) -> list
 
 
 def make_stacks(n: int, rng: random.Random) -> tuple[Stack, Stack]:
-	"""Random input of n distinct numbers.
+	"""
+	Random input of n distinct numbers.
 
 	A random permutation of 0..n-1 is its own ranking, so we fill `ind`
 	directly instead of calling make_ind() (O(n^2)), which would dominate
@@ -39,7 +42,9 @@ def make_stacks(n: int, rng: random.Random) -> tuple[Stack, Stack]:
 
 def benchmark_point(algo: Algorithm, n: int, runs: int,
 					rng: random.Random | None = None) -> tuple[float, float]:
-	"""Mean and standard deviation of the number of ops over `runs` random inputs."""
+	"""
+	Mean and standard deviation of the number of ops over `runs` random inputs.
+	"""
 	rng = rng or random.Random()
 	counts = []
 	for _ in range(runs):

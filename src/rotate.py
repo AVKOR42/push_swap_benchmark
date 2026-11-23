@@ -31,6 +31,7 @@ def rrotate_all(a: Stack, b: Stack) -> str:
     rrotate(b)
     return "rrr"
 
+
 def rotate_n(a: Stack, n: int) -> list[str]:
     """
     n > 0: n x rotate (top -> bottom); n < 0: |n| x rrotate (bottom -> top).

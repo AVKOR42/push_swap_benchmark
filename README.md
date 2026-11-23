@@ -17,14 +17,15 @@ To test your `push_swap` code in C, you can use the  [push_swap visualizer](http
 pip install PyQt6 matplotlib
 ```
 
-## Run
+## Usage
 
 From the project root:
 
 ```bash
 python bench.py
 # or
-chmod +x bench.py && ./bench.py
+chmod +x bench.py
+./bench.py
 ```
 
 ## Project layout

@@ -55,7 +55,7 @@ class Stack:
 		values = getter()
 		for i in range(self.last + 1):
 			v = values[i]
-			if v < ref and (best == -1 or v > values[best]):
+			if (v < ref) and (best == -1 or v > values[best]):
 				best = i
 		return best
 
