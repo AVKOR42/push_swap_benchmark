@@ -6,7 +6,7 @@ needs as a function of the stack size N.
 
 ![push_swap vizualisator](Screenshot.png)
 
-To test your `push_swap` code in C, you can use the  [push_swap visualizer](https://github.com/AVKOR42/push_swap_viz00).
+To test your `push_swap` code in C, you can use the  [push_swap visualizer](https://github.com/AVKOR42/push_swap_viz).
 
 ## Requirements
 
